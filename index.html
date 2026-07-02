@@ -1,192 +1,310 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>loop — Self-management built for ADHD brains</title>
-<link rel="icon" href="assets/loop-logo.png" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-<style>
-  :root{
-    --bg:#0a0908;
-    --ink:#f4f2ed;
-    --dim:0.12;          /* baseline opacity of un-lit words */
-    --red:#e4f92e;
-    --hair:rgba(244,242,237,0.12);
-    --pace:5;            /* reveal spread (set by tweak) */
-    --font:"Pretendard", "Pretendard Variable", -apple-system, system-ui, sans-serif;
-  }
-  *{ box-sizing:border-box; margin:0; padding:0; }
-  html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:var(--font);
-    font-weight:500;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-  }
-  /* subtle filmic vignette so pure black edges don't feel flat */
-  body::after{
-    content:"";
-    position:fixed; inset:0; pointer-events:none; z-index:1;
-    background:radial-gradient(130% 100% at 50% 0%, transparent 55%, rgba(0,0,0,0.55) 100%);
-  }
-  ::selection{ background:var(--red); color:#0a0908; }
-
-  /* ---------- type primitives ---------- */
-  .eyebrow{
-    font-family:var(--font);
-    font-size:clamp(0.66rem,1vw,0.8rem);
-    letter-spacing:0.28em;
-    text-transform:uppercase;
-    color:var(--red);
-  }
-  .word{
-    opacity:var(--dim);
-    transition:opacity .08s linear;
-    will-change:opacity;
-  }
-  .word.w-accent{ color:var(--red); }
-
-  /* ---------- nav ---------- */
-  nav.top{
-    position:fixed; top:0; left:0; right:0; z-index:50;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:clamp(16px,2vw,26px) clamp(18px,3.5vw,46px);
-    mix-blend-mode:normal;
-  }
-  .brandmark{ display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink); }
-  .brandmark img{ height:30px; width:auto; display:block; border-radius:4px; }
-  .brandmark .wm{ font-weight:700; letter-spacing:0.02em; font-size:1.05rem; }
-  .navjoin{
-    font-family:var(--font);
-    font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase;
-    color:var(--ink); text-decoration:none;
-    border:1px solid var(--hair); border-radius:100px; white-space:nowrap;
-    padding:9px 18px; transition:.25s ease;
-  }
-  .navjoin:hover{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
-
-  /* ---------- hero ---------- */
-  .hero{ position:relative; min-height:100svh; display:flex; padding:clamp(18px,3.5vw,46px); padding-bottom:clamp(86px,9vw,130px); z-index:2; }
-  .hero .eyebrow{ opacity:0; animation:fadeUp .9s .15s ease forwards; }
-  .hero h1{
-    font-weight:700; line-height:0.92; letter-spacing:-0.035em;
-    text-wrap:balance;
-  }
-  .hero h1 .ln{ display:block; opacity:0; transform:translateY(0.4em); animation:fadeUp 1s ease forwards; }
-  .hero .sub{ opacity:0; animation:fadeUp .9s ease forwards; color:rgba(244,242,237,0.6); }
-  .hero .cue{
-    position:absolute; bottom:clamp(22px,3vw,40px); right:clamp(20px,3.5vw,46px);
-    font-family:var(--font); font-size:0.72rem; letter-spacing:0.22em; text-transform:uppercase;
-    color:rgba(244,242,237,0.45); display:flex; align-items:center; gap:10px;
-    opacity:0; animation:fadeUp 1s 1.1s ease forwards;
-  }
-  .hero .cue .bar{ width:1px; height:34px; background:var(--ink); transform-origin:top; animation:cue 1.8s ease-in-out infinite; }
-  @keyframes cue{ 0%,100%{ transform:scaleY(0.25); opacity:.4 } 50%{ transform:scaleY(1); opacity:1 } }
-  @keyframes fadeUp{ to{ opacity:1; transform:none; } }
-
-  /* --- hero: MINIMAL (left editorial) --- */
-  .hero.h-minimal{ align-items:flex-end; }
-  .hero.h-minimal .inner{ max-width:1500px; }
-  .hero.h-minimal .eyebrow{ margin-bottom:clamp(20px,3vw,34px); }
-  .hero.h-minimal h1{ font-size:clamp(3.1rem,12vw,12.5rem); }
-  .hero.h-minimal h1 .ln:nth-child(2){ animation-delay:.18s; }
-  .hero.h-minimal h1 .ln:nth-child(3){ animation-delay:.32s; }
-  .hero.h-minimal .sub{ margin-top:clamp(22px,2.6vw,38px); font-size:clamp(1rem,1.5vw,1.45rem); max-width:30ch; animation-delay:.7s; }
-
-  /* --- hero: BOLD (centered, big mark) --- */
-  .hero.h-bold{ align-items:center; justify-content:center; text-align:center; }
-  .hero.h-bold .inner{ display:flex; flex-direction:column; align-items:center; }
-  .hero.h-bold .bigmark{ width:clamp(230px,30vw,460px); height:auto; border-radius:10px; margin-bottom:clamp(26px,3.6vw,52px); opacity:0; animation:fadeUp .9s .1s ease forwards; box-shadow:0 24px 80px -28px var(--red); }
-  .hero.h-bold .eyebrow{ margin-bottom:clamp(20px,2.6vw,30px); }
-  .hero.h-bold h1{ font-size:clamp(2.8rem,9.5vw,10rem); }
-  .hero.h-bold h1 .ln:nth-child(2){ animation-delay:.16s; }
-  .hero.h-bold .sub{ margin-top:clamp(22px,2.6vw,36px); font-size:clamp(1rem,1.5vw,1.4rem); max-width:34ch; animation-delay:.62s; }
-  .hero.h-bold .cue{ left:50%; right:auto; transform:translateX(-50%); }
-  .hero.h-minimal .bigmark{ display:none; }
-
-  .accent-ink{ color:var(--red); }
-
-  /* ---------- pinned statement stages ---------- */
-  .stage{ position:relative; min-height:155vh; z-index:2; }
-  .stage.short{ min-height:135vh; }
-  .stage-inner{
-    position:sticky; top:0; height:100svh;
-    display:flex; flex-direction:column; justify-content:center;
-    padding:clamp(28px,6vw,120px); gap:clamp(20px,2.4vw,34px);
-  }
-  .stage .eyebrow{ opacity:0.9; }
-  .statement{
-    font-weight:600; line-height:1.04; letter-spacing:-0.025em;
-    font-size:clamp(2rem,6.6vw,6.4rem);
-    max-width:18ch; text-wrap:balance;
-  }
-  .stage.wide .statement{ max-width:24ch; }
-
-  /* how-it-works: stacked reveal lines */
-  .howlist{ display:flex; flex-direction:column; gap:clamp(18px,2.4vw,40px); max-width:100%; }
-  .howline{ font-weight:600; line-height:1.05; letter-spacing:-0.02em; font-size:clamp(1.5rem,4.6vw,3.6rem); max-width:20ch; text-wrap:balance; }
-  .howline .num{ font-family:var(--font); font-size:0.42em; color:var(--red); vertical-align:super; margin-right:0.5em; letter-spacing:0; }
-
-  /* ---------- CTA ---------- */
-  .cta-inner{ align-items:flex-start; }
-  .cta-head{ font-weight:700; line-height:0.95; letter-spacing:-0.035em; font-size:clamp(2.8rem,9vw,8.5rem); max-width:16ch; }
-  .form{
-    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    margin-top:clamp(26px,3vw,44px); width:min(560px,100%);
-    opacity:0; transform:translateY(14px); transition:.7s ease;
-  }
-  .form.in{ opacity:1; transform:none; }
-  .form input{
-    flex:1 1 240px; min-width:0;
-    background:transparent; border:none; border-bottom:1.5px solid var(--hair);
-    color:var(--ink); font-family:var(--font); font-size:1.15rem; font-weight:500;
-    padding:14px 4px; outline:none; transition:border-color .25s;
-  }
-  .form input::placeholder{ color:rgba(244,242,237,0.32); }
-  .form input:focus{ border-color:var(--red); }
-  .form button{
-    flex:0 0 auto; cursor:pointer;
-    background:var(--red); color:#044f39; border:none; border-radius:100px;
-    font-family:var(--font); font-weight:700; font-size:0.82rem; letter-spacing:0.16em; text-transform:uppercase;
-    padding:15px 28px; transition:transform .2s ease, filter .2s ease;
-  }
-  .form button:hover{ transform:translateY(-2px); filter:brightness(1.08); }
-  .form button:active{ transform:translateY(0); }
-  .formnote{ margin-top:14px; font-family:var(--font); font-size:0.74rem; letter-spacing:0.04em; color:rgba(244,242,237,0.4); min-height:1em; }
-  .formnote.ok{ color:var(--red); }
-  .err{ border-bottom-color:var(--red) !important; }
-
-  /* ---------- footer ---------- */
-  footer{ position:relative; z-index:2; padding:clamp(40px,6vw,90px) clamp(18px,3.5vw,46px) clamp(30px,4vw,56px); border-top:1px solid var(--hair); }
-  .footmark{ font-weight:700; letter-spacing:-0.03em; line-height:0.82; color:var(--red); font-size:clamp(4rem,22vw,22rem); }
-  .footrow{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:24px; margin-top:clamp(24px,3vw,40px); }
-  .footrow .left{ display:flex; align-items:center; gap:14px; }
-  .footrow img{ height:40px; width:auto; border-radius:6px; }
-  .footrow .meta{ font-family:var(--font); font-size:0.72rem; letter-spacing:0.1em; color:rgba(244,242,237,0.42); line-height:1.7; text-transform:uppercase; }
-  .footrow .links{ display:flex; gap:22px; font-family:var(--font); font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase; }
-  .footrow .links a{ color:rgba(244,242,237,0.6); text-decoration:none; transition:color .2s; }
-  .footrow .links a:hover{ color:var(--red); }
-
-  /* progress rail */
-  .rail{ position:fixed; top:0; left:0; height:2px; background:var(--red); width:0; z-index:60; }
-
-  @media (max-width:640px){
-    .navjoin{ display:none; }
-    .statement{ max-width:14ch; }
-  }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
 </head>
 <body>
-  <div id="root"></div>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800;900&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Noto+Sans+Thai:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+html{scroll-behavior:smooth}
+body{background:#F6F6F1;font-family:'IBM Plex Sans KR',system-ui,sans-serif;color:#12251A;-webkit-font-smoothing:antialiased;letter-spacing:-.2px}
+a{text-decoration:none;color:inherit}
+h1,h2,h3{font-family:'Gothic A1','IBM Plex Sans KR',sans-serif;margin:0}
+.eb{font-family:'Space Mono',monospace;font-weight:700;font-size:12px;letter-spacing:2.5px;text-transform:uppercase}
+.btn{transition:transform .16s ease,background .16s ease,border-color .16s ease}
+.btn:hover{transform:translateY(-2px)}
+.card{transition:transform .18s ease,border-color .18s ease}
+.card:hover{transform:translateY(-3px);border-color:rgba(18,37,26,.22)}
+.navl{transition:color .15s}.navl:hover{color:#12251A}
+.dcard:hover{border-color:rgba(200,242,78,.55)}
+svg{display:block}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes floaty2{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+</style>
+</helmet>
 
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<div style="width:100%;overflow-x:hidden">
 
-  <script type="text/babel" src="tweaks-panel.jsx"></script>
-  <script type="text/babel" src="app.jsx"></script>
+  <!-- ===================== HERO ===================== -->
+  <section style="position:relative;background:#0F2417;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(90% 80% at 82% -10%,rgba(200,242,78,.14),transparent 55%)"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,242,78,.4),transparent)"></div>
+
+    <nav style="position:relative;z-index:3;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:22px 40px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:9px;background:#C8F24E;display:flex;align-items:center;justify-content:center;font:800 15px 'Gothic A1';color:#0F2417">어</div>
+        <div style="font:700 17px 'IBM Plex Sans KR';color:#F3F7EC;letter-spacing:-.3px">어서와 <span style="color:#C8F24E">AI</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:32px;font:500 14.5px 'IBM Plex Sans KR';color:#AEC0A6">
+        <a class="navl" href="#problem" style="color:#AEC0A6">왜 필요한가</a>
+        <a class="navl" href="#how" style="color:#AEC0A6">작동 방식</a>
+        <a class="navl" href="#features" style="color:#AEC0A6">차별점</a>
+        <a class="navl" href="#showcase" style="color:#AEC0A6">미리보기</a>
+      </div>
+      <a href="#cta" class="btn" style="background:#C8F24E;color:#12251A;font:600 14px 'IBM Plex Sans KR';padding:10px 18px;border-radius:11px">무료로 시작하기</a>
+    </nav>
+
+    <div style="position:relative;z-index:2;max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:48px;padding:64px 40px 104px">
+      <div style="flex:1 1 460px;min-width:340px">
+        <div class="eb" style="color:#C8F24E">소상공인 AI 다국어 응대</div>
+        <h1 style="margin:20px 0 0;font-weight:900;font-size:clamp(40px,5.6vw,68px);line-height:1.06;letter-spacing:-2px;color:#F3F7EC">외국어는 못해도,<br><span style="color:#C8F24E">외국인 손님</span>은<br>놓치지 않게.</h1>
+        <p style="margin:26px 0 0;max-width:494px;font:400 17px/1.7 'IBM Plex Sans KR';color:#AEC0A6;letter-spacing:-.2px">손님은 QR을 찍어 자기 언어로 묻고, AI가 매장 정보로 1차 응대합니다. 예약·방문·구매 가능성이 높은 문의만 <span style="color:#F3F7EC;font-weight:600">한국어로 요약</span>해 사장님께 전달해요.</p>
+        <div style="margin-top:34px;display:flex;flex-wrap:wrap;gap:12px">
+          <a href="#cta" class="btn" style="background:#C8F24E;color:#12251A;font:600 15px 'IBM Plex Sans KR';padding:15px 26px;border-radius:13px">무료로 시작하기</a>
+          <a href="#how" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,.22);color:#F3F7EC;font:500 15px 'IBM Plex Sans KR';padding:15px 24px;border-radius:13px">작동 방식 보기 ↓</a>
+        </div>
+        <div style="margin-top:30px;display:flex;flex-wrap:wrap;gap:10px 22px;font:400 13px 'Space Mono',monospace;color:#7E9377;letter-spacing:.3px">
+          <span>[ 앱 설치 불필요 ]</span><span>[ EN · TH · CN ]</span><span>[ 매장 가격·정책 반영 ]</span>
+        </div>
+      </div>
+
+      <div style="flex:0 0 auto;position:relative;margin:0 auto;width:326px;height:674px">
+        <div style="position:absolute;top:-4px;left:-92px;z-index:5;background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 24px 46px -18px rgba(0,0,0,.5);max-width:212px;animation:floaty 6s ease-in-out infinite">
+          <div style="display:flex;align-items:center;gap:6px;font:700 10px 'Space Mono',monospace;color:#B04A32;letter-spacing:.5px"><span style="width:6px;height:6px;border-radius:50%;background:#E07A5F"></span>TH · 손님</div>
+          <div style="margin-top:6px;font:500 12.5px/1.45 'Noto Sans Thai';color:#33402C">อยากจองเจลเล็บ 2 คน วันเสาร์บ่าย 2 โมงได้ไหมคะ?</div>
+        </div>
+        <div style="position:absolute;bottom:24px;right:-70px;z-index:5;background:#DFF3B8;border-radius:14px;padding:12px 14px;box-shadow:0 24px 46px -18px rgba(0,0,0,.4);max-width:214px;animation:floaty2 5s ease-in-out infinite .6s">
+          <div style="display:flex;align-items:center;gap:6px;font:700 10px 'Space Mono',monospace;color:#3B6B14;letter-spacing:.5px"><span style="width:6px;height:6px;border-radius:50%;background:#5C9A2E"></span>AI · 사장님께 요약</div>
+          <div style="margin-top:6px;font:600 12.5px/1.45 'IBM Plex Sans KR';color:#1B2E12">토요일 오후 2시, 젤네일 2명 예약 문의예요.</div>
+        </div>
+
+        <!-- REAL DEVICE · HUB (392×812 scaled) -->
+        <div style="position:relative;z-index:2;width:392px;height:812px;border-radius:52px;background:linear-gradient(160deg,#242024,#151215);padding:12px;box-shadow:0 50px 96px -30px rgba(10,20,6,.7),inset 0 0 0 2px rgba(255,255,255,.06);transform:scale(.831);transform-origin:top left">
+          <div style="position:relative;width:100%;height:100%;border-radius:41px;overflow:hidden;background:#294420;display:flex;flex-direction:column">
+            <div style="position:relative;z-index:6;flex:none;height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font:600 14px 'Poppins';color:#EAF1DD;background:#365A24">
+              <span>9:41</span>
+              <div style="position:absolute;left:50%;top:9px;transform:translateX(-50%);width:104px;height:26px;background:#0F0C0F;border-radius:16px"></div>
+              <div style="display:flex;gap:6px;align-items:center"><span style="font-size:12px">📶</span><span style="font-size:12px">🔋</span></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;background:linear-gradient(180deg,#365A24,#2E4A21 52%,#294420);padding:8px 24px 0;display:flex;flex-direction:column;align-items:center">
+              <div style="display:inline-flex;gap:2px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px">
+                <span style="padding:7px 15px;border-radius:999px;background:#CFF564;color:#233318;font:600 12.5px 'Poppins'">EN</span>
+                <span style="padding:7px 15px;border-radius:999px;color:#C7D3BD;font:600 12.5px 'Noto Sans Thai'">ไทย</span>
+                <span style="padding:7px 15px;border-radius:999px;color:#C7D3BD;font:600 12.5px 'Noto Sans SC'">中文</span>
+              </div>
+              <div style="margin-top:20px;width:88px;height:88px;border-radius:50%;background:linear-gradient(150deg,#DCFB6A,#C3EE44);display:flex;align-items:center;justify-content:center;font:700 36px 'Poppins';color:#243F16;box-shadow:0 16px 34px -12px rgba(180,230,70,.55),0 0 0 5px rgba(255,255,255,.9)">L</div>
+              <div style="margin-top:16px;display:flex;align-items:center;gap:7px"><span style="font:700 21px 'Poppins';color:#F3F8E9;letter-spacing:-.4px">LUA Nail &amp; Hair</span><span style="width:18px;height:18px;border-radius:50%;background:#CFF564;color:#243F16;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span></div>
+              <div style="margin-top:5px;font:500 14px 'Poppins',system-ui;color:#CFF564">루아 헤어</div>
+              <div style="margin-top:6px;font:500 13px 'Noto Sans Thai';color:#B4C79E">💅 เล็บ &amp; ผม · 홍대</div>
+              <div style="margin-top:12px;display:inline-flex;align-items:center;gap:7px;background:rgba(207,245,100,.16);border-radius:999px;padding:6px 12px;font:600 11px 'Poppins';color:#CFF564"><span style="width:7px;height:7px;border-radius:50%;background:#CFF564"></span>AI replies in seconds · 24/7</div>
+              <div style="width:100%;margin-top:22px;display:flex;flex-direction:column;gap:12px">
+                <div style="background:#CFF564;border-radius:20px;padding:15px 18px 15px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 14px 30px -12px rgba(150,200,50,.75)"><div style="flex:none;width:44px;height:44px;border-radius:14px;background:rgba(28,51,19,.14);display:flex;align-items:center;justify-content:center;font-size:22px">💬</div><div style="flex:1"><div style="font:600 15.5px 'Poppins';color:#1C3313">Chat with our AI</div><div style="font:500 12px 'Poppins';color:rgba(28,51,19,.68);margin-top:2px">Prices, booking &amp; more — anytime</div></div><span style="color:rgba(28,51,19,.6);font-size:20px">›</span></div>
+                <div style="background:#FCFCF3;border:1px solid rgba(0,0,0,.04);border-radius:20px;padding:15px 18px 15px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 26px -16px rgba(0,0,0,.55)"><div style="flex:none;width:44px;height:44px;border-radius:14px;background:#EDF5D7;display:flex;align-items:center;justify-content:center;font-size:21px">💅</div><div style="flex:1"><div style="font:600 15px 'Poppins';color:#233318">Menu &amp; Prices</div><div style="font:400 12px 'Poppins';color:#9A8B92;margin-top:2px">Nail &amp; hair services</div></div><span style="color:#D9C8CE;font-size:20px">›</span></div>
+                <div style="background:#FCFCF3;border:1px solid rgba(0,0,0,.04);border-radius:20px;padding:15px 18px 15px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 26px -16px rgba(0,0,0,.55)"><div style="flex:none;width:44px;height:44px;border-radius:14px;background:#EDF5D7;display:flex;align-items:center;justify-content:center;font-size:21px">📅</div><div style="flex:1"><div style="font:600 15px 'Poppins';color:#233318">Book a visit</div><div style="font:400 12px 'Poppins';color:#9A8B92;margin-top:2px">Send a request in seconds</div></div><span style="color:#D9C8CE;font-size:20px">›</span></div>
+                <div style="background:#FCFCF3;border:1px solid rgba(0,0,0,.04);border-radius:20px;padding:15px 18px 15px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 26px -16px rgba(0,0,0,.55)"><div style="flex:none;width:44px;height:44px;border-radius:14px;background:#EDF5D7;display:flex;align-items:center;justify-content:center;font-size:21px">📍</div><div style="flex:1"><div style="font:600 15px 'Poppins';color:#233318">Find us</div><div style="font:400 12px 'Poppins';color:#9A8B92;margin-top:2px">3 min from Hongik Univ. Stn.</div></div><span style="color:#D9C8CE;font-size:20px">›</span></div>
+              </div>
+              <div style="margin-top:20px;display:flex;gap:14px">
+                <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font:700 13px 'Poppins';color:#CFF564">IG</div>
+                <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:18px">💬</div>
+                <div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:17px">📞</div>
+              </div>
+            </div>
+            <div style="position:absolute;left:0;right:0;bottom:0;height:26px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:8"><div style="width:132px;height:5px;border-radius:3px;background:rgba(255,255,255,.4)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROBLEM ===================== -->
+  <section id="problem" style="background:#F6F6F1;padding:104px 40px">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="max-width:720px">
+        <div class="eb" style="color:#4E7A2E">— WHY OSOWA</div>
+        <h2 style="margin:16px 0 0;font-weight:800;font-size:clamp(30px,3.8vw,44px);line-height:1.2;letter-spacing:-1.2px;color:#12251A">문제는 외국어가 아니라,<br>놓친 <span style="color:#3B7A1E">문의</span>입니다</h2>
+        <p style="margin:18px 0 0;font:400 16px/1.7 'IBM Plex Sans KR';color:#5A6B5C">외국인 손님이 늘어도, 바쁜 매장에서는 반복 질문과 예약 문의를 제때 받기 어렵습니다.</p>
+      </div>
+      <div style="margin-top:52px;display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px">
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:30px">
+          <div style="width:46px;height:46px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+          <div style="margin-top:20px;font:700 18px 'Gothic A1';color:#12251A;letter-spacing:-.5px">반복 문의에 지쳐요</div>
+          <div style="margin-top:10px;font:400 14.5px/1.65 'IBM Plex Sans KR';color:#5A6B5C">가격·영업시간·예약 같은 질문을, 매번 번역기를 켜서 답하고 있어요.</div>
+        </div>
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:30px">
+          <div style="width:46px;height:46px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div style="margin-top:20px;font:700 18px 'Gothic A1';color:#12251A;letter-spacing:-.5px">예약 문의를 놓쳐요</div>
+          <div style="margin-top:10px;font:400 14.5px/1.65 'IBM Plex Sans KR';color:#5A6B5C">손이 바쁜 시간엔 확인이 늦어지고, 방문·구매로 이어질 손님을 놓칩니다.</div>
+        </div>
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:30px">
+          <div style="width:46px;height:46px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></div>
+          <div style="margin-top:20px;font:700 18px 'Gothic A1';color:#12251A;letter-spacing:-.5px">도구가 따로 놀아요</div>
+          <div style="margin-top:10px;font:400 14.5px/1.65 'IBM Plex Sans KR';color:#5A6B5C">번역기·챗봇은 매장 정보, 고객 접점, 리드 관리가 분리돼 운영이 어렵습니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section id="how" style="background:#0F2417;padding:104px 40px">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="max-width:720px">
+        <div class="eb" style="color:#C8F24E">— HOW IT WORKS</div>
+        <h2 style="margin:16px 0 0;font-weight:800;font-size:clamp(30px,3.8vw,44px);line-height:1.2;letter-spacing:-1.2px;color:#F3F7EC">등록부터 전달까지, 하나의 흐름</h2>
+      </div>
+      <div style="margin-top:54px;display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:1px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden">
+        <div style="background:#0F2417;padding:30px 26px">
+          <div style="font:700 30px 'Space Mono',monospace;color:#C8F24E">01</div>
+          <div style="margin-top:18px;font:700 17px 'Gothic A1';color:#F3F7EC;letter-spacing:-.4px">매장 정보 등록</div>
+          <div style="margin-top:10px;font:400 13.5px/1.65 'IBM Plex Sans KR';color:#9DB49F">메뉴·가격·영업시간·예약정책·위치·FAQ를 넣으면 AI가 매장 전용 지식베이스로 정리합니다.</div>
+        </div>
+        <div style="background:#0F2417;padding:30px 26px">
+          <div style="font:700 30px 'Space Mono',monospace;color:#C8F24E">02</div>
+          <div style="margin-top:18px;font:700 17px 'Gothic A1';color:#F3F7EC;letter-spacing:-.4px">손님이 QR 스캔</div>
+          <div style="margin-top:10px;font:400 13.5px/1.65 'IBM Plex Sans KR';color:#9DB49F">앱 설치 없이, 손님이 자기 언어(영어·태국어·중국어 등)로 바로 질문합니다.</div>
+        </div>
+        <div style="background:#0F2417;padding:30px 26px">
+          <div style="font:700 30px 'Space Mono',monospace;color:#C8F24E">03</div>
+          <div style="margin-top:18px;font:700 17px 'Gothic A1';color:#F3F7EC;letter-spacing:-.4px">AI 1차 응대</div>
+          <div style="margin-top:10px;font:400 13.5px/1.65 'IBM Plex Sans KR';color:#9DB49F">반복 문의는 매장 정보 기반으로 자동 응대해 사장님의 시간을 아껴줍니다.</div>
+        </div>
+        <div style="background:#16351F;padding:30px 26px">
+          <div style="font:700 30px 'Space Mono',monospace;color:#C8F24E">04</div>
+          <div style="margin-top:18px;font:700 17px 'Gothic A1';color:#F3F7EC;letter-spacing:-.4px">한국어 요약 전달</div>
+          <div style="margin-top:10px;font:400 13.5px/1.65 'IBM Plex Sans KR';color:#CFE0B8">예약·방문·구매 가능성이 높은 문의만 사장님께 한국어로 요약해 전달합니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURES ===================== -->
+  <section id="features" style="background:#F6F6F1;padding:104px 40px">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="max-width:720px">
+        <div class="eb" style="color:#4E7A2E">— DIFFERENT BY DESIGN</div>
+        <h2 style="margin:16px 0 0;font-weight:800;font-size:clamp(30px,3.8vw,44px);line-height:1.2;letter-spacing:-1.2px;color:#12251A">번역기·챗봇과 무엇이 다른가</h2>
+      </div>
+      <div style="margin-top:52px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px">
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:28px"><div style="width:44px;height:44px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-7"/></svg></div><div style="margin-top:17px;font:700 17px 'Gothic A1';color:#12251A;letter-spacing:-.4px">QR 기반 고객 접점</div><div style="margin-top:9px;font:400 14px/1.6 'IBM Plex Sans KR';color:#5A6B5C">테이블·입구의 QR 하나로, 손님이 앱 없이 바로 연결됩니다.</div></div>
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:28px"><div style="width:44px;height:44px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/></svg></div><div style="margin-top:17px;font:700 17px 'Gothic A1';color:#12251A;letter-spacing:-.4px">매장별 RAG 응대</div><div style="margin-top:9px;font:400 14px/1.6 'IBM Plex Sans KR';color:#5A6B5C">일반 챗봇이 아니라, 우리 매장의 가격·정책을 반영한 정확한 답변.</div></div>
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:28px"><div style="width:44px;height:44px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></div><div style="margin-top:17px;font:700 17px 'Gothic A1';color:#12251A;letter-spacing:-.4px">리드 자동 분류</div><div style="margin-top:9px;font:400 14px/1.6 'IBM Plex Sans KR';color:#5A6B5C">예약·방문·구매 가능성이 높은 문의를 자동으로 가려냅니다.</div></div>
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:28px"><div style="width:44px;height:44px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div><div style="margin-top:17px;font:700 17px 'Gothic A1';color:#12251A;letter-spacing:-.4px">사장님용 한국어 요약</div><div style="margin-top:9px;font:400 14px/1.6 'IBM Plex Sans KR';color:#5A6B5C">외국어를 몰라도 '가능·불가·대안·직접 수정' 버튼으로 응대 완료.</div></div>
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:28px"><div style="width:44px;height:44px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="13" y="7" width="3" height="10"/></svg></div><div style="margin-top:17px;font:700 17px 'Gothic A1';color:#12251A;letter-spacing:-.4px">응대 준비도 진단</div><div style="margin-top:9px;font:400 14px/1.6 'IBM Plex Sans KR';color:#5A6B5C">상담 데이터로 부족한 정보와 자주 묻는 질문을 찾아 점수를 개선합니다.</div></div>
+        <div class="card" style="background:#fff;border:1px solid rgba(18,37,26,.1);border-radius:18px;padding:28px"><div style="width:44px;height:44px;border-radius:12px;border:1px solid rgba(18,37,26,.14);display:flex;align-items:center;justify-content:center;color:#16311F"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></div><div style="margin-top:17px;font:700 17px 'Gothic A1';color:#12251A;letter-spacing:-.4px">다국어 자동 번역</div><div style="margin-top:9px;font:400 14px/1.6 'IBM Plex Sans KR';color:#5A6B5C">사장님은 한국어로, 손님은 자기 언어로. 번역은 AI가 알아서.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SHOWCASE ===================== -->
+  <section id="showcase" style="background:#0F2417;padding:104px 40px">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="max-width:720px">
+        <div class="eb" style="color:#C8F24E">— PRODUCT</div>
+        <h2 style="margin:16px 0 0;font-weight:800;font-size:clamp(30px,3.8vw,44px);line-height:1.2;letter-spacing:-1.2px;color:#F3F7EC">손님도, 사장님도 각자의 언어로</h2>
+      </div>
+      <div style="margin-top:56px;display:flex;flex-wrap:wrap;justify-content:center;gap:60px">
+
+        <div style="flex:0 0 auto;max-width:300px">
+          <div style="position:relative;width:298px;height:617px;margin:0 auto">
+            <div style="position:absolute;top:0;left:0;width:392px;height:812px;border-radius:52px;background:linear-gradient(160deg,#242024,#151215);padding:12px;box-shadow:0 40px 84px -30px rgba(0,0,0,.65),inset 0 0 0 2px rgba(255,255,255,.06);transform:scale(.76);transform-origin:top left">
+              <div style="position:relative;width:100%;height:100%;border-radius:41px;overflow:hidden;background:#F4F6EC;display:flex;flex-direction:column">
+                <div style="flex:none;height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font:600 14px 'Poppins';color:#2E3A24;background:#F4F6EC"><span>9:41</span><div style="position:absolute;left:50%;top:9px;transform:translateX(-50%);width:104px;height:26px;background:#0F0C0F;border-radius:16px"></div><div style="display:flex;gap:6px"><span style="font-size:12px">📶</span><span style="font-size:12px">🔋</span></div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:10px;padding:4px 14px 12px;border-bottom:1px solid rgba(30,46,20,.07)">
+                  <div style="flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#3E5230;background:#fff;border:1px solid rgba(30,46,20,.08)">‹</div>
+                  <div style="position:relative;width:40px;height:40px;border-radius:12px;background:linear-gradient(150deg,#4B7834,#33531F);display:flex;align-items:center;justify-content:center;font:700 16px 'Poppins';color:#EAF6C8">L<span style="position:absolute;right:-2px;bottom:-2px;width:12px;height:12px;border-radius:50%;background:#8FD14B;border:2.5px solid #F4F6EC"></span></div>
+                  <div style="flex:1"><div style="font:600 14.5px 'Poppins';color:#233318">LUA Nail &amp; Hair</div><div style="font:500 11px 'Noto Sans Thai';color:#5C8A34;margin-top:2px">ผู้ช่วย AI · ตอบทันที</div></div>
+                  <div style="display:flex;align-items:center;gap:5px;background:#fff;border:1px solid rgba(30,46,20,.1);border-radius:11px;padding:7px 10px;font:600 12px 'Noto Sans Thai';color:#3E5230">🌐 ไทย</div>
+                </div>
+                <div style="flex:1;min-height:0;overflow:hidden;padding:18px 16px 8px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;gap:9px;align-items:flex-end"><div style="flex:none;width:28px;height:28px;border-radius:9px;background:linear-gradient(150deg,#4B7834,#33531F);display:flex;align-items:center;justify-content:center;font:700 12px 'Poppins';color:#EAF6C8">L</div><div style="max-width:80%;background:#fff;border:1px solid rgba(30,46,20,.06);color:#31402A;font:400 13px/1.5 'Noto Sans Thai';padding:11px 14px;border-radius:20px 20px 20px 6px;box-shadow:0 8px 20px -14px rgba(30,46,20,.4)">สวัสดีค่ะ! ถามเรื่องราคา การจอง และเส้นทางได้เลยค่ะ 🌸</div></div>
+                  <div style="display:flex;justify-content:flex-end"><div style="max-width:78%;background:linear-gradient(150deg,#4B7834,#33531F);color:#F4FBE2;font:500 13px/1.5 'Noto Sans Thai';padding:11px 14px;border-radius:20px 20px 6px 20px;box-shadow:0 8px 18px -10px rgba(51,83,31,.55)">อยากจองเจลเล็บ วันเสาร์บ่ายได้ไหมคะ?</div></div>
+                  <div style="display:flex;gap:9px;align-items:flex-start"><div style="flex:none;width:28px;height:28px;border-radius:9px;background:linear-gradient(150deg,#4B7834,#33531F);display:flex;align-items:center;justify-content:center;font:700 12px 'Poppins';color:#EAF6C8">L</div><div style="flex:1;display:flex;flex-direction:column;gap:8px">
+                    <div style="background:#fff;border:1px solid rgba(30,46,20,.06);color:#31402A;font:400 13px/1.5 'Noto Sans Thai';padding:11px 14px;border-radius:20px 20px 20px 6px;box-shadow:0 8px 20px -14px rgba(30,46,20,.4)">ได้เลยค่ะ 🌸 นี่คือบริการยอดนิยมค่ะ</div>
+                    <div style="background:#fff;border:1px solid rgba(30,46,20,.07);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 8px 20px -16px rgba(30,46,20,.4)"><div style="width:36px;height:36px;border-radius:11px;background:#EDF5D7;display:flex;align-items:center;justify-content:center;font-size:17px">💅</div><div style="flex:1"><div style="font:600 13px 'Noto Sans Thai';color:#233318">เจลเล็บ</div><div style="font:400 11px 'Noto Sans Thai';color:#9A8B92;margin-top:1px">60–90 นาที</div></div><div style="text-align:right"><div style="font:600 8.5px 'Poppins';text-transform:uppercase;letter-spacing:.4px;color:#4C7A1E;background:#E4F2C4;padding:2px 6px;border-radius:6px;margin-bottom:3px">Popular</div><div style="font:700 13px 'Poppins';color:#233318">₩45,000</div></div></div>
+                    <div style="background:#fff;border:1px solid rgba(30,46,20,.07);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 8px 20px -16px rgba(30,46,20,.4)"><div style="width:36px;height:36px;border-radius:11px;background:#EDF5D7;display:flex;align-items:center;justify-content:center;font-size:17px">🤍</div><div style="flex:1"><div style="font:600 13px 'Noto Sans Thai';color:#233318">ดูแลเล็บพื้นฐาน</div><div style="font:400 11px 'Noto Sans Thai';color:#9A8B92;margin-top:1px">40 นาที</div></div><div style="font:700 13px 'Poppins';color:#233318">₩30,000</div></div>
+                    <div style="align-self:flex-start;margin-top:2px;background:#233318;color:#EAF6C8;font:600 12.5px 'Noto Sans Thai';padding:10px 15px;border-radius:13px">จอง →</div>
+                  </div></div>
+                </div>
+                <div style="flex:none;display:flex;gap:8px;padding:8px 16px 6px;overflow:hidden"><div style="flex:none;background:#fff;border:1px solid #D6E6BB;color:#4C6B22;font:600 12px 'Noto Sans Thai';padding:8px 13px;border-radius:14px">จองคิว</div><div style="flex:none;background:#fff;border:1px solid #D6E6BB;color:#4C6B22;font:600 12px 'Noto Sans Thai';padding:8px 13px;border-radius:14px">ที่ตั้ง</div><div style="flex:none;background:#fff;border:1px solid #D6E6BB;color:#4C6B22;font:600 12px 'Noto Sans Thai';padding:8px 13px;border-radius:14px">เวลาเปิด</div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:9px;padding:6px 16px 12px;background:#F4F6EC"><div style="flex:1;border:1px solid rgba(30,46,20,.12);background:#fff;border-radius:22px;padding:12px 16px;font:400 13px 'Noto Sans Thai';color:#9AA88C">พิมพ์ข้อความ…</div><div style="flex:none;width:44px;height:44px;border-radius:50%;background:linear-gradient(150deg,#4B7834,#33531F);display:flex;align-items:center;justify-content:center;color:#EAF6C8;font-size:18px">➤</div></div>
+                <div style="position:absolute;left:0;right:0;bottom:0;height:26px;display:flex;align-items:center;justify-content:center;pointer-events:none"><div style="width:132px;height:5px;border-radius:3px;background:rgba(30,46,20,.28)"></div></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:24px;font:700 17px 'Gothic A1';color:#F3F7EC;letter-spacing:-.4px">손님 화면 — 자기 언어로 문의</div>
+          <div style="margin-top:7px;font:400 13.5px/1.6 'IBM Plex Sans KR';color:#9DB49F;max-width:290px">QR을 찍고 자기 언어로 물으면, AI가 가격·예약까지 바로 안내합니다.</div>
+        </div>
+
+        <div style="flex:0 0 auto;max-width:300px">
+          <div style="position:relative;width:298px;height:617px;margin:0 auto">
+            <div style="position:absolute;top:0;left:0;width:392px;height:812px;border-radius:52px;background:linear-gradient(160deg,#242024,#151215);padding:12px;box-shadow:0 40px 84px -30px rgba(0,0,0,.65),inset 0 0 0 2px rgba(255,255,255,.06);transform:scale(.76);transform-origin:top left">
+              <div style="position:relative;width:100%;height:100%;border-radius:41px;overflow:hidden;background:#F4F6EC;display:flex;flex-direction:column">
+                <div style="flex:none;height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font:600 14px 'Poppins';color:#2E3A24;background:#F4F6EC"><span>9:41</span><div style="position:absolute;left:50%;top:9px;transform:translateX(-50%);width:104px;height:26px;background:#0F0C0F;border-radius:16px"></div><div style="display:flex;gap:6px"><span style="font-size:12px">📶</span><span style="font-size:12px">🔋</span></div></div>
+                <div style="flex:none;display:flex;align-items:center;gap:10px;padding:4px 14px 12px;border-bottom:1px solid rgba(30,46,20,.07)">
+                  <div style="flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#3E5230;background:#fff;border:1px solid rgba(30,46,20,.08)">‹</div>
+                  <div style="flex:1;font:700 15px 'Noto Sans KR';color:#233318">문의 상세</div>
+                  <span style="font:700 11px 'Noto Sans KR';padding:4px 10px;border-radius:9px;background:#E4F2C4;color:#3B5A1E">예약</span>
+                </div>
+                <div style="flex:1;min-height:0;overflow:hidden;padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+                  <div style="display:flex;align-items:center;gap:12px"><div style="width:46px;height:46px;border-radius:14px;background:#EDF5D7;display:flex;align-items:center;justify-content:center;font-size:22px">🇹🇭</div><div style="flex:1"><div style="font:700 15px 'Noto Sans KR';color:#233318">Ploy <span style="font-weight:500;color:#7E8A70;font-size:12.5px">· 태국어 고객</span></div><div style="font:400 11.5px 'Noto Sans KR';color:#9AA88C;margin-top:2px">12분 전 접수</div></div></div>
+                  <div style="background:linear-gradient(150deg,#F1FADF,#E7F4CF);border:1px solid #D3E7A6;border-radius:18px;padding:15px 16px"><div style="font:700 11px 'Noto Sans KR';color:#4C7A1E;letter-spacing:.3px">✨ AI 한국어 요약</div><div style="margin-top:9px;font:500 14.5px/1.6 'Noto Sans KR';color:#24331A">토요일 오후 2시에 젤네일을 두 명이 함께 받을 수 있는지, 예약이 가능한지 문의했어요.</div></div>
+                  <div style="background:#fff;border:1px solid rgba(30,46,20,.06);border-radius:18px;padding:4px 16px;box-shadow:0 8px 20px -16px rgba(30,46,20,.4)">
+                    <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(30,46,20,.06);font:400 13px 'Noto Sans KR'"><span style="color:#7E8A70">서비스</span><span style="color:#233318;font-weight:600">젤네일</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(30,46,20,.06);font:400 13px 'Noto Sans KR'"><span style="color:#7E8A70">희망 일시</span><span style="color:#233318;font-weight:600">토요일 14:00</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:11px 0;font:400 13px 'Noto Sans KR'"><span style="color:#7E8A70">인원</span><span style="color:#233318;font-weight:600">2명</span></div>
+                  </div>
+                  <div>
+                    <div style="font:600 13px 'Noto Sans KR';color:#3E5230;margin:2px 2px 11px">어떻게 응대할까요?</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                      <div style="padding:15px 12px;border-radius:16px;background:linear-gradient(150deg,#4B7834,#33531F);color:#EAF6C8;text-align:center;box-shadow:0 12px 24px -14px rgba(51,83,31,.8)"><div style="font-size:19px">✅</div><div style="margin-top:5px;font:700 13.5px 'Noto Sans KR'">가능</div></div>
+                      <div style="padding:15px 12px;border-radius:16px;background:#fff;border:1px solid rgba(30,46,20,.1);color:#B23A2E;text-align:center;box-shadow:0 8px 20px -16px rgba(30,46,20,.4)"><div style="font-size:19px">🚫</div><div style="margin-top:5px;font:700 13.5px 'Noto Sans KR'">불가</div></div>
+                      <div style="padding:15px 12px;border-radius:16px;background:#fff;border:1px solid rgba(30,46,20,.1);color:#2F6BE0;text-align:center;box-shadow:0 8px 20px -16px rgba(30,46,20,.4)"><div style="font-size:19px">🔁</div><div style="margin-top:5px;font:700 13.5px 'Noto Sans KR'">대안 제시</div></div>
+                      <div style="padding:15px 12px;border-radius:16px;background:#fff;border:1px solid rgba(30,46,20,.1);color:#233318;text-align:center;box-shadow:0 8px 20px -16px rgba(30,46,20,.4)"><div style="font-size:19px">✏️</div><div style="margin-top:5px;font:700 13.5px 'Noto Sans KR'">직접 수정</div></div>
+                    </div>
+                    <div style="margin-top:11px;display:flex;align-items:flex-start;gap:7px;font:400 11.5px/1.5 'Noto Sans KR';color:#8A9678"><span>🌐</span><span>선택하면 AI가 태국어로 자동 번역해 고객에게 전송해요.</span></div>
+                  </div>
+                </div>
+                <div style="position:absolute;left:0;right:0;bottom:0;height:26px;display:flex;align-items:center;justify-content:center;pointer-events:none"><div style="width:132px;height:5px;border-radius:3px;background:rgba(30,46,20,.28)"></div></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:24px;font:700 17px 'Gothic A1';color:#F3F7EC;letter-spacing:-.4px">사장님 화면 — 한국어로 응대</div>
+          <div style="margin-top:7px;font:400 13.5px/1.6 'IBM Plex Sans KR';color:#9DB49F;max-width:290px">중요 문의만 한국어 요약으로. 버튼만 누르면 손님 언어로 전송됩니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CTA ===================== -->
+  <section id="cta" style="background:#F6F6F1;padding:104px 40px">
+    <div style="max-width:1040px;margin:0 auto;position:relative;overflow:hidden;border-radius:28px;background:#0F2417;padding:72px 48px;text-align:center">
+      <div style="position:absolute;inset:0;background:radial-gradient(90% 120% at 82% -20%,rgba(200,242,78,.16),transparent 55%)"></div>
+      <h2 style="position:relative;font-weight:800;font-size:clamp(30px,4vw,46px);line-height:1.2;letter-spacing:-1.2px;color:#F3F7EC">외국인 손님, 이제 놓치지 마세요</h2>
+      <p style="position:relative;margin:18px auto 0;max-width:520px;font:400 16px/1.7 'IBM Plex Sans KR';color:#AEC0A6">매장 정보만 등록하면 오늘부터 QR로 응대를 시작할 수 있어요. 설치도, 외국어도 필요 없습니다.</p>
+      <div style="position:relative;margin-top:32px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+        <a href="#" class="btn" style="background:#C8F24E;color:#12251A;font:600 15px 'IBM Plex Sans KR';padding:15px 28px;border-radius:13px">무료로 시작하기</a>
+        <a href="#" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,.22);color:#F3F7EC;font:500 15px 'IBM Plex Sans KR';padding:15px 26px;border-radius:13px">매장 QR 무료 제작 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer style="background:#0A1B10;padding:60px 40px 44px">
+    <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:44px;justify-content:space-between">
+      <div style="max-width:300px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:9px;background:#C8F24E;display:flex;align-items:center;justify-content:center;font:800 15px 'Gothic A1';color:#0F2417">어</div>
+          <div style="font:700 17px 'IBM Plex Sans KR';color:#F3F7EC">어서와 <span style="color:#C8F24E">AI</span></div>
+        </div>
+        <p style="margin:14px 0 0;font:400 13px/1.65 'IBM Plex Sans KR';color:#7E9377">외국어는 못해도, 외국인 손님은 놓치지 않게. 소상공인을 위한 AI 다국어 응대 서비스.</p>
+      </div>
+      <div style="display:flex;gap:56px;flex-wrap:wrap">
+        <div><div class="eb" style="color:#C8F24E;font-size:11px">제품</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:10px;font:400 13px 'IBM Plex Sans KR';color:#9FB187"><a class="navl" href="#how">작동 방식</a><a class="navl" href="#features">차별점</a><a class="navl" href="#showcase">미리보기</a></div></div>
+        <div><div class="eb" style="color:#C8F24E;font-size:11px">회사</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:10px;font:400 13px 'IBM Plex Sans KR';color:#9FB187"><a class="navl" href="#">소개</a><a class="navl" href="#">블로그</a><a class="navl" href="#">채용</a></div></div>
+        <div><div class="eb" style="color:#C8F24E;font-size:11px">문의</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:10px;font:400 13px 'IBM Plex Sans KR';color:#9FB187"><a class="navl" href="#">고객센터</a><a class="navl" href="#">도입 상담</a><a class="navl" href="#">이용약관</a></div></div>
+      </div>
+    </div>
+    <div style="max-width:1200px;margin:38px auto 0;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);font:400 12px 'Space Mono',monospace;color:#5E6F51;letter-spacing:.3px">© 2026 osowa AI — All rights reserved.</div>
+  </footer>
+
+</div>
+</x-dc>
 </body>
 </html>
