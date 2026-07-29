@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="QR을 스캔하고 메뉴와 가격을 편하게 묻는 새로운 매장 경험, FOFU."
+    />
+    <meta name="theme-color" content="#000000" />
+    <meta property="og:title" content="FOFU — Menu? Price? Just ask." />
+    <meta
+      property="og:description"
+      content="외국어는 못해도, 외국인 손님은 놓치지 않게."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/hero-1200.jpg" />
+    <title>FOFU — Menu? Price? Just ask.</title>
+    <link rel="icon" type="image/png" href="fofu_logo.png" />
+    <link rel="preload" as="image" href="assets/hero-1200.jpg" />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문 바로가기</a>
+
+    <header class="site-header" data-header>
+      <div class="header-inner shell">
+        <a class="wordmark" href="#top" aria-label="FOFU 홈">
+          <img
+            src="fofu_logo.png"
+            alt="FOFU"
+            width="996"
+            height="998"
+          />
+        </a>
+
+        <nav class="desktop-nav" aria-label="주요 메뉴">
+          <a href="#about">소개</a>
+          <a href="#how">이용 방법</a>
+          <a href="#places">사용 장면</a>
+        </nav>
+
+        <a class="header-cta" href="#contact">
+          매장에 FOFU 놓기
+          <span aria-hidden="true">↗</span>
+        </a>
+
+        <button
+          class="menu-button"
+          type="button"
+          aria-label="메뉴 열기"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+          data-menu-button
+        >
+          <span>MENU</span>
+        </button>
+      </div>
+
+      <div class="mobile-menu" id="mobile-menu" data-mobile-menu>
+        <nav aria-label="모바일 메뉴">
+          <a href="#about">FOFU 소개</a>
+          <a href="#how">이용 방법</a>
+          <a href="#places">사용 장면</a>
+          <a href="#contact">시작하기</a>
+        </nav>
+        <p>MENU? PRICE? JUST ASK.</p>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <picture class="hero-media" aria-hidden="true">
+          <source media="(max-width: 760px)" srcset="assets/hero-720.jpg" />
+          <source media="(max-width: 1320px)" srcset="assets/hero-1200.jpg" />
+          <img
+            src="assets/hero-1920.jpg"
+            alt=""
+            width="1920"
+            height="1080"
+            fetchpriority="high"
+          />
+        </picture>
+        <div class="hero-overlay" aria-hidden="true"></div>
+
+        <div class="hero-inner shell">
+          <p class="eyebrow" data-reveal>FOFU FOR EVERY GUEST</p>
+          <h1 class="fixed-lines" id="hero-title" data-reveal>
+            <span>외국어는 못해도,</span>
+            <span><em class="accent">외국인 손님</em>은</span>
+            <span>놓치지 않게.</span>
+          </h1>
+          <p class="hero-copy fixed-lines" data-reveal>
+            <span>FOFU가 메뉴와 가격에 대한 질문을 돕고,</span>
+            <span>낯선 손님의 선택을 더 가깝게 만듭니다.</span>
+          </p>
+          <div class="hero-actions" data-reveal>
+            <a class="button button-light" href="#how">
+              이용 방법 보기
+              <span aria-hidden="true">↓</span>
+            </a>
+            <a class="plain-link" href="#places">사용 장면 보기</a>
+          </div>
+        </div>
+
+        <div class="hero-foot shell" aria-hidden="true">
+          <span>SCAN · ASK · CHOOSE</span>
+          <span>FOFU / SEOUL</span>
+        </div>
+      </section>
+
+      <section class="intro section" id="about" aria-labelledby="about-title">
+        <div class="shell">
+          <p class="section-label" data-reveal>WHY FOFU</p>
+          <div class="intro-grid">
+            <h2 class="fixed-lines" id="about-title" data-reveal>
+              <span>질문은 짧게.</span>
+              <span>선택은 가볍게.</span>
+            </h2>
+            <div class="intro-copy" data-reveal>
+              <p>
+                가게 앞에서, 창가에서, 테이블에서.<br />
+                궁금한 순간 바로 묻는 경험을 만듭니다.
+              </p>
+              <div class="intro-flow" aria-label="FOFU 이용 흐름">
+                <span>SCAN</span>
+                <i aria-hidden="true"></i>
+                <span>ASK</span>
+                <i aria-hidden="true"></i>
+                <span>CHOOSE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="how section" id="how" aria-labelledby="how-title">
+        <div class="shell">
+          <div class="section-head">
+            <p class="section-label" data-reveal>HOW IT WORKS</p>
+            <h2 class="fixed-lines" id="how-title" data-reveal>
+              <span>스캔하고. 묻고.</span>
+              <span>선택하세요.</span>
+            </h2>
+          </div>
+
+          <ol class="steps">
+            <li data-reveal>
+              <span class="step-number">01</span>
+              <h3>QR을 찾습니다</h3>
+              <p>입구, 창가, 테이블에 놓인 FOFU를 발견합니다.</p>
+            </li>
+            <li data-reveal>
+              <span class="step-number">02</span>
+              <h3>궁금한 것을 묻습니다</h3>
+              <p>메뉴와 가격에 대한 질문을 편하게 입력합니다.</p>
+            </li>
+            <li data-reveal>
+              <span class="step-number">03</span>
+              <h3>다음 선택으로 갑니다</h3>
+              <p>망설임을 덜고 나에게 맞는 메뉴를 찾아갑니다.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="street" aria-labelledby="street-title">
+        <picture class="street-media">
+          <source media="(max-width: 760px)" srcset="assets/street-720.jpg" />
+          <source media="(max-width: 1320px)" srcset="assets/street-1200.jpg" />
+          <img
+            src="assets/street-1920.jpg"
+            alt="FOFU QR 안내판이 설치된 활기찬 상점 거리"
+            width="1920"
+            height="1079"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
+        <div class="street-overlay" aria-hidden="true"></div>
+        <div class="street-copy shell">
+          <p class="eyebrow" data-reveal>FROM STREET TO TABLE</p>
+          <h2 class="fixed-lines" id="street-title" data-reveal>
+            <span>거리에서 발견하고,</span>
+            <span>자리에서 이어집니다.</span>
+          </h2>
+        </div>
+      </section>
+
+      <section
+        class="places section"
+        id="places"
+        aria-labelledby="places-title"
+      >
+        <div class="shell">
+          <div class="places-head">
+            <div>
+              <p class="section-label" data-reveal>FOFU IN PLACE</p>
+              <h2 class="fixed-lines" id="places-title" data-reveal>
+                <span>FOFU가 놓이는 곳.</span>
+              </h2>
+            </div>
+            <p data-reveal>
+              손님의 시선이 닿는 곳이면<br />
+              작은 QR 하나로 충분합니다.
+            </p>
+          </div>
+
+          <div class="place-gallery">
+            <figure data-reveal>
+              <div class="place-image">
+                <img
+                  src="pic03.png"
+                  alt="FOFU QR 메뉴 카드가 놓인 카페 테이블"
+                  width="669"
+                  height="1196"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <figcaption>
+                <span>TABLE</span>
+                <h3>테이블 위에서</h3>
+              </figcaption>
+            </figure>
+
+            <figure data-reveal>
+              <div class="place-image">
+                <img
+                  src="pic04.png"
+                  alt="FOFU QR 안내 스티커가 부착된 카페 외관"
+                  width="664"
+                  height="1196"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <figcaption>
+                <span>WINDOW</span>
+                <h3>창가를 지나다가</h3>
+              </figcaption>
+            </figure>
+
+            <figure data-reveal>
+              <div class="place-image">
+                <img
+                  src="pic05.png"
+                  alt="상점 입구에 부착된 FOFU QR 안내 스티커"
+                  width="705"
+                  height="1196"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <figcaption>
+                <span>DOOR</span>
+                <h3>가게에 들어서며</h3>
+              </figcaption>
+            </figure>
+          </div>
+          <p class="swipe-hint" aria-hidden="true">옆으로 넘겨보세요 →</p>
+        </div>
+      </section>
+
+      <section class="contact" id="contact" aria-labelledby="contact-title">
+        <div class="contact-inner shell">
+          <p class="section-label" data-reveal>START WITH FOFU</p>
+          <h2 class="fixed-lines" id="contact-title" data-reveal>
+            <span>첫 질문이 생기는 곳에,</span>
+            <span>FOFU를 놓아보세요.</span>
+          </h2>
+          <button class="button button-dark" type="button" data-contact-button>
+            FOFU 도입 알아보기
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner shell">
+        <a class="footer-wordmark" href="#top" aria-label="FOFU 홈">
+          <img
+            src="fofu_logo.png"
+            alt="FOFU"
+            width="996"
+            height="998"
+            loading="lazy"
+          />
+        </a>
+        <p>MENU? PRICE? JUST ASK.</p>
+        <img
+          src="CONTXT_logo.png"
+          alt="CONTXT"
+          width="2809"
+          height="884"
+          loading="lazy"
+        />
+        <span>© 2026 FOFU</span>
+      </div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast>
+      <p>
+        <strong>문의 채널 연결 전입니다.</strong>
+        <span>담당 연락처를 연결하면 바로 사용할 수 있어요.</span>
+      </p>
+      <button type="button" aria-label="알림 닫기" data-toast-close>×</button>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
