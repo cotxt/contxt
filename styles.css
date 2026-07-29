@@ -635,14 +635,14 @@ button {
 }
 
 .site-footer {
-  padding: 48px 0;
+  padding: 56px 0 28px;
   color: var(--white);
   background: var(--forest-dark);
 }
 
 .footer-inner {
   display: grid;
-  grid-template-columns: 1fr 1fr auto auto;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: 44px;
 }
@@ -670,10 +670,25 @@ button {
   letter-spacing: 0.12em;
 }
 
-.footer-inner img {
-  width: 88px;
+.footer-signoff {
+  display: flex;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-signoff span {
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.contxt-logo {
+  width: 150px;
   height: auto;
-  opacity: 0.68;
 }
 
 .toast {
@@ -692,17 +707,21 @@ button {
   align-items: center;
   gap: 14px;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
   transform: translateY(14px);
   transition:
     opacity 0.25s ease,
-    transform 0.35s var(--ease);
+    transform 0.35s var(--ease),
+    visibility 0s linear 0.35s;
 }
 
 .toast.is-visible {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
+  transition-delay: 0s;
 }
 
 .toast p {
@@ -795,11 +814,13 @@ button {
     flex-direction: column;
     justify-content: space-between;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
     transform: translateY(-12px);
     transition:
       opacity 0.3s ease,
-      transform 0.4s var(--ease);
+      transform 0.4s var(--ease),
+      visibility 0s linear 0.4s;
   }
 
   .site-header.is-menu-open {
@@ -810,8 +831,10 @@ button {
 
   .is-menu-open .mobile-menu {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
     transform: translateY(0);
+    transition-delay: 0s;
   }
 
   .mobile-menu nav {
@@ -1058,12 +1081,16 @@ button {
     justify-self: end;
   }
 
-  .footer-inner img {
-    display: none;
-  }
-
   .footer-inner > span {
     grid-column: 1 / -1;
+  }
+
+  .footer-signoff {
+    margin-top: 36px;
+  }
+
+  .contxt-logo {
+    width: 126px;
   }
 
   .toast {
