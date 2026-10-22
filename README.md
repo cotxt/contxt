@@ -2,6 +2,14 @@
 
 `contxt.html` is the standalone homepage. GitHub Pages serves its identical copy, `index.html`. `CNAME` sets the custom domain to `contxt.im`; `.nojekyll` publishes the static files directly.
 
+## App privacy policy
+
+`privacy/index.html` serves `https://contxt.im/privacy/`. This checkout's `origin` is `https://github.com/cotxt/contxt.git`, on branch `main`. Keep the policy content identical to the app backend's `app/data/privacy.html`; the Pages copy additionally has its canonical URL link.
+
+For a policy update, review and commit the policy file in this checkout, push to its existing `origin/main`, and verify the GitHub Pages deployment and live policy. Do not run `scripts/deploy-github-pages.sh` for this update: that older homepage helper targets `kimpeter/contxt` and copies only homepage files, excluding the policy.
+
+The October 22, 2026 update describes optional, user-entered 출신 information, its server storage, and its visibility in member profiles and authenticated rankings. It follows the existing member-information retention and account-deletion rules.
+
 The original export is preserved locally in `input/CONTXT.original.html` and excluded from version control. Edit `src/contxt.template.html`, then rebuild and verify:
 
 ```sh
